@@ -1,0 +1,6 @@
+python-telegram-bot==13.7
+requests
+googletrans==4.0.0rc1
+beautifulsoup4
+telegram
+flask
