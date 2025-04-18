@@ -35,6 +35,65 @@ def fetch_binance_data():
     except Exception as e:
         print("خطأ أثناء الاتصال بـ Binance:", e)
         return []
+def analyze_sectors_volume(data):
+    sector_volumes = {sector: 0 for sector in WATCHED_SECTORS}
+
+    for item in data:
+        symbol = item.get("symbol", "")
+        volume = float(item.get("quoteVolume", 0))
+
+        for sector in WATCHED_SECTORS:
+            if sector.lower().replace(" ", "") in symbol.lower():
+                sector_volumes[sector] += volume
+
+‎    # ترتيب أعلى القطاعات ضخًا
+    sorted_sectors = sorted(sector_volumes.items(), key=lambda x: x[1], reverse=True)
+
+    return sorted_sectors
+‎# دالة إرسال تنبيه عند تغيّر السيولة في القطاعات
+def send_sector_alerts(context: CallbackContext):
+    data = fetch_binance_data()
+    if not data:
+        return
+
+    sorted_sectors = analyze_sectors_volume(data)
+
+    message = "تنبيه: تحرك السيولة في القطاعات التالية:\n"
+    for sector, volume in sorted_sectors[:5]:
+        if volume > 0:
+            message += f"• {sector}: {volume:,.0f} USDT\n"
+
+    if "السيولة" not in context.chat_data.get("last_alert", ""):
+        context.bot.send_message(chat_id=context.job.context, text=message)
+        context.chat_data["last_alert"] = "السيولة"
+‎‎# دالة مقارنة التغيرات وإرسال تنبيهات متعددة
+def check_sector_volume_change(bot, chat_id, previous_volumes, current_volumes, threshold=15):
+    alerts = []
+    for sector, current_volume in current_volumes.items():
+        previous_volume = previous_volumes.get(sector, 0)
+        if previous_volume == 0:
+            continue
+        change_percent = ((current_volume - previous_volume) / previous_volume) * 100
+        if change_percent >= threshold:
+            alerts.append(f"نمو سيولة كبير في قطاع: {sector} بنسبة {change_percent:.2f}%")
+    
+    if alerts:
+        message = "\n".join(alerts)
+        bot.send_message(chat_id=chat_id, text=message)
+‎# تشغيل التنبيهات التلقائية للسيولة كل 60 ثانية
+def start_auto_sector_monitoring(bot, chat_id):
+    def monitor():
+        previous_volumes = {}
+        while True:
+            data = fetch_binance_data()
+            if not data:
+                time.sleep(60)
+                continue
+            current_volumes = analyze_sectors_volume(data)
+            check_sector_volume_change(bot, chat_id, previous_volumes, current_volumes)
+            previous_volumes = current_volumes
+            time.sleep(60)
+    threading.Thread(target=monitor).start()
 # توكن البوت
 TELEGRAM_BOT_TOKEN = '7651191638:AAHYogMKCm4mkOJKPe1U7-sVlcL70Rin0LA'
 
@@ -160,8 +219,11 @@ dispatcher = updater.dispatcher
 dispatcher.add_handler(CommandHandler("start", start))
 dispatcher.add_handler(CommandHandler("news", news))
 dispatcher.add_handler(CommandHandler("listings", listings))
-dispatcher.add_handler(CommandHandler("auto", start_auto_tasks))
-
+dispatcher.add_handler(CommandHandler("auto", auto))
+def auto(update: Update, context: CallbackContext):
+    update.message.reply_text("تم تفعيل المراقبة التلقائية للسيولة.")
+    chat_id = update.effective_chat.id
+    start_auto_sector_monitoring(context.bot, chat_id)
 # تشغيل البوت
 updater.start_polling()
 updater.idle()
