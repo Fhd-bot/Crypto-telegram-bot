@@ -7,6 +7,34 @@ from googletrans import Translator
 from bs4 import BeautifulSoup
 import threading
 import time
+‎# القطاعات المحددة لمراقبة السيولة
+WATCHED_SECTORS = {
+    "AI": [],
+    "DeFi": [],
+    "BNB Chain": [],
+    "Gaming": [],
+    "Solana": [],
+    "Meme": [],
+    "Megadrop": [],
+    "RWA": [],
+‎    "البنية التحتية": [],
+‎    "الطبقة 1 / الطبقة 2": [],
+‎    "مجمّع الإطلاق": []
+}
+
+‎# دالة جلب بيانات Binance
+def fetch_binance_data():
+    url = "https://api.binance.com/api/v3/ticker/24hr"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print("فشل في جلب البيانات من Binance")
+            return []
+    except Exception as e:
+        print("خطأ أثناء الاتصال بـ Binance:", e)
+        return []
 # توكن البوت
 TELEGRAM_BOT_TOKEN = '7651191638:AAHYogMKCm4mkOJKPe1U7-sVlcL70Rin0LA'
 
