@@ -120,7 +120,7 @@ def coin_glass():
             if alert:
                 context.bot.send_message(chat_id=chat_id, text=alert)
             time.sleep(300)
-    threading.Thread(target=coin_glass).start()
+            threading.Thread(target=coin_glass).start()
 
 updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
