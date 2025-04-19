@@ -7,7 +7,7 @@ from googletrans import Translator
 from bs4 import BeautifulSoup
 import threading
 import time
-‎# القطاعات المحددة لمراقبة السيولة
+# القطاعات المحددة لمراقبة السيولة
 WATCHED_SECTORS = {
     "AI": [],
     "DeFi": [],
