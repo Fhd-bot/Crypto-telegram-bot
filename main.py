@@ -224,4 +224,3 @@ dispatcher.add_handler(CommandHandler("auto", auto))
 # تشغيل البوت
 updater.start_polling()
 updater.idle()
-""")
