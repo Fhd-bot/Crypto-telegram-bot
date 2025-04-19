@@ -18,10 +18,9 @@ WATCHED_SECTORS = {
     "Megadrop": [],
     "RWA": [],
 ‎    "البنية التحتية": [],
-‎    "الطبقة 1 / الطبقة 2": [],
-‎    "مجمّع الإطلاق": []
+‎    ‎"الطبقة 1 / الطبقة 2": [],
+‎    ‎"مجمع الإطلاق": []
 }
-
 ‎# دالة جلب بيانات Binance
 def fetch_binance_data():
     url = "https://api.binance.com/api/v3/ticker/24hr"
